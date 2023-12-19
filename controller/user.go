@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"fmt"
+	"net/http"
 	"sluck/usecase"
 
 	"github.com/labstack/echo"
@@ -25,7 +25,15 @@ func NewUserController(u usecase.UserUsecase) UserController {
 
 // Createは新しいユーザーを作成するためのHTTPリクエストを処理します。
 func (c *userController) Create(ctx echo.Context) error {
-	// 実際のHTTPリクエスト処理のロジックはここに追加します。
-	fmt.Println("creating...")
+	var req UserRequest
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
+	// fmt.Println("creating...", req.Name)
+	u := toModel(req)
+	// fmt.Println(u.Name, u.Age, u.Email, u.CreatedAt, u.UpdatedAt)
+	c.u.Create(ctx.Request().Context(), u)
+
 	return nil
 }

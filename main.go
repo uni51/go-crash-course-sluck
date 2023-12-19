@@ -1,18 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"sluck/controller"
 	"sluck/repository"
 	"sluck/usecase"
+
+	"github.com/labstack/echo"
 )
 
 func main() {
-	fmt.Println("Hello World!")
+	e := echo.New()
 
 	ur := repository.NewUserRepository(nil)
 	uu := usecase.NewUserUsecase(ur)
 	uc := controller.NewUserController(uu)
 
-	uc.Create(nil)
+	e.POST("/users", uc.Create)
+	e.Start(":8080")
 }
