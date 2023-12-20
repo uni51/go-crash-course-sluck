@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"sluck/controller"
+	"sluck/infra"
 	"sluck/repository"
 	"sluck/usecase"
 
@@ -25,7 +26,8 @@ func main() {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	ur := repository.NewUserRepository(nil)
+	db := infra.Connect()
+	ur := repository.NewUserRepository(db)
 	uu := usecase.NewUserUsecase(ur)
 	uc := controller.NewUserController(uu)
 
