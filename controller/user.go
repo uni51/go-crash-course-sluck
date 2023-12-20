@@ -30,6 +30,10 @@ func (c *userController) Create(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, err)
 	}
 
+	if err := ctx.Validate(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, err)
+	}
+
 	// fmt.Println("creating...", req.Name)
 	u := toModel(req)
 	// fmt.Println(u.Name, u.Age, u.Email, u.CreatedAt, u.UpdatedAt)
