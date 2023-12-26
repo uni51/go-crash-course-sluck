@@ -32,5 +32,9 @@ func main() {
 	uc := controller.NewUserController(uu)
 
 	e.POST("/users", uc.Create)
+	e.GET("/users/:id", uc.Get)
+	e.PUT("/users", uc.Update)
+	e.DELETE("/users/:id", uc.Delete)
+
 	e.Start(":8080")
 }

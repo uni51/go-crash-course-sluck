@@ -11,9 +11,9 @@ type UserRequest struct {
 	Email string `json:"email"`
 }
 
-func toModel(req UserRequest) *model.User {
+func toModel(req UserRequest) model.User {
 	now := time.Now()
-	return &model.User{
+	return model.User{
 		Name:      req.Name,
 		Age:       req.Age,
 		Email:     req.Email,
