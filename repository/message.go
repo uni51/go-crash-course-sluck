@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 )
 
 type MessageRepository interface {
@@ -18,9 +19,23 @@ func NewMessageRepository(db *sql.DB) MessageRepository {
 }
 
 func (r *messageRepository) Delete(ctx context.Context, userId string) error {
-	_, err := r.db.Exec("DELETE FROM messages WHERE user_id = ?", userId)
+	db, ok := GetTx(ctx)
+	if !ok {
+		return fmt.Errorf("no transaction found")
+	}
+
+	result, err := db.Exec("DELETE FROM messages WHERE user_id = ?", userId)
 	if err != nil {
 		return err
+	}
+
+	rowsAffect, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffect == 0 {
+		return fmt.Errorf("no rows affected: %s", userId)
 	}
 
 	return nil

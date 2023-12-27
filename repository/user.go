@@ -71,7 +71,12 @@ func (r *userRepository) Update(ctx context.Context, user *model.User) error {
 }
 
 func (r *userRepository) Delete(ctx context.Context, id string) error {
-	result, err := r.db.Exec("DELETE FROM users WHERE id = ?", id)
+	db, ok := GetTx(ctx)
+	if !ok {
+		return fmt.Errorf("no transaction found")
+	}
+
+	result, err := db.Exec("DELETE FROM users WHERE id = ?", id)
 	if err != nil {
 		return err
 	}

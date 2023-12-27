@@ -4,6 +4,7 @@ import (
 	"context"
 	"sluck/model"
 	"sluck/repository"
+	"sluck/transaction"
 )
 
 // UserUsecaseはユーザー関連のビジネスロジックを抽象化するインターフェースです。
@@ -16,13 +17,14 @@ type UserUsecase interface {
 
 // userUsecaseはUserUsecaseの実装です。
 type userUsecase struct {
-	r  repository.UserRepository
-	mr repository.MessageRepository
+	r           repository.UserRepository
+	mr          repository.MessageRepository
+	transaction transaction.Transaction
 }
 
 // NewUserUsecaseはUserUsecaseの新しいインスタンスを作成します。
-func NewUserUsecase(r repository.UserRepository, mr repository.MessageRepository) UserUsecase {
-	return &userUsecase{r, mr}
+func NewUserUsecase(r repository.UserRepository, mr repository.MessageRepository, transaction transaction.Transaction) UserUsecase {
+	return &userUsecase{r, mr, transaction}
 }
 
 func (u *userUsecase) GetById(ctx context.Context, id string) (*model.User, error) {
@@ -54,15 +56,20 @@ func (u *userUsecase) Update(ctx context.Context, user *model.User) error {
 }
 
 func (u *userUsecase) Delete(ctx context.Context, id string) error {
-	err := u.r.Delete(ctx, id)
-	if err != nil {
-		return err
-	}
+	u.transaction.DoInTx(ctx, func(ctx context.Context) (any, error) {
+		err := u.r.Delete(ctx, id)
+		if err != nil {
+			return nil, err
+		}
 
-	err = u.mr.Delete(ctx, id)
-	if err != nil {
-		return err
-	}
+		// ユーザーのメッセージも削除する
+		err = u.mr.Delete(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+
+		return nil, nil
+	})
 
 	return nil
 }

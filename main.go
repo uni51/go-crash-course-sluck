@@ -5,6 +5,7 @@ import (
 	"sluck/controller"
 	"sluck/infra"
 	"sluck/repository"
+	"sluck/transaction"
 	"sluck/usecase"
 
 	"github.com/go-playground/validator/v10"
@@ -27,9 +28,11 @@ func main() {
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	db := infra.Connect()
+	transaction := transaction.NewTransaction(db)
+
 	mr := repository.NewMessageRepository(db)
 	ur := repository.NewUserRepository(db)
-	uu := usecase.NewUserUsecase(ur, mr)
+	uu := usecase.NewUserUsecase(ur, mr, transaction)
 	uc := controller.NewUserController(uu)
 
 	e.POST("/users", uc.Create)
