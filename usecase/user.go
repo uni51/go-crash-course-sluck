@@ -16,12 +16,13 @@ type UserUsecase interface {
 
 // userUsecaseはUserUsecaseの実装です。
 type userUsecase struct {
-	r repository.UserRepository
+	r  repository.UserRepository
+	mr repository.MessageRepository
 }
 
 // NewUserUsecaseはUserUsecaseの新しいインスタンスを作成します。
-func NewUserUsecase(r repository.UserRepository) UserUsecase {
-	return &userUsecase{r}
+func NewUserUsecase(r repository.UserRepository, mr repository.MessageRepository) UserUsecase {
+	return &userUsecase{r, mr}
 }
 
 func (u *userUsecase) GetById(ctx context.Context, id string) (*model.User, error) {
@@ -54,6 +55,11 @@ func (u *userUsecase) Update(ctx context.Context, user *model.User) error {
 
 func (u *userUsecase) Delete(ctx context.Context, id string) error {
 	err := u.r.Delete(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	err = u.mr.Delete(ctx, id)
 	if err != nil {
 		return err
 	}

@@ -27,8 +27,9 @@ func main() {
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	db := infra.Connect()
+	mr := repository.NewMessageRepository(db)
 	ur := repository.NewUserRepository(db)
-	uu := usecase.NewUserUsecase(ur)
+	uu := usecase.NewUserUsecase(ur, mr)
 	uc := controller.NewUserController(uu)
 
 	e.POST("/users", uc.Create)
